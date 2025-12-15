@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Calculations</title>
+</head>
+<body>
+
+<h1>Calculations</h1>
+
+<h2>Add Calculation</h2>
+<select id="operation">
+  <option value="add">Add</option>
+  <option value="subtract">Subtract</option>
+  <option value="multiply">Multiply</option>
+  <option value="divide">Divide</option>
+</select>
+
+<input id="a" type="number" placeholder="A">
+<input id="b" type="number" placeholder="B">
+<button onclick="addCalc()">Add</button>
+
+<h2>All Calculations</h2>
+<ul id="list"></ul>
+
+<script>
+const API = "http://localhost:3001";
+
+function load() {
+  fetch(API + "/calculations")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+      data.forEach(c => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          ${c.id}: ${c.operation} (${c.operandA}, ${c.operandB}) = ${c.result}
+          <button onclick="del(${c.id})">Delete</button>
+        `;
+        list.appendChild(li);
+      });
+    });
+}
+
+function addCalc() {
+  fetch(API + "/calculations", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      operation: document.getElementById("operation").value,
+      operandA: document.getElementById("a").value,
+      operandB: document.getElementById("b").value
+    })
+  }).then(load);
+}
+
+function del(id) {
+  fetch(API + "/calculations/" + id, { method: "DELETE" })
+    .then(load);
+}
+
+load();
+</script>
+
+</body>
+</html>
